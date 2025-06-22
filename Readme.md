@@ -20,6 +20,7 @@ This was my first time, in which I was tracking the progress through weights and
 Pictures from wandb after 2 epoch training was completed are below, the provision to make the wandb public is not there in the weights and biases workspace in which I completed this project, so I'd need to invite people in my team for them to see the results of run involved in this project. For that I would need to get the mail ids to give access and invite in the workspace and then it would be visible to them. I am open to give access to mail id, but the project workspace cannot be made public (It's written down in the W&B settings under my workspace.) Comment mail id and I'll send a invite, then it can be visible.
 
 Wandb (Org.) - amannagrawall002-iit-roorkee-org
+
 Wandb (username) - amannagrawall002
 
 The screenshots on the wandb can be seen in the directory wandb screenshots, the model was built from scratch and 2 epochs were run.
