@@ -31,7 +31,8 @@ The architecture consists of three main components:
 
 3.  **Discriminator:** A conditional discriminator that receives both an image (real or fake) and the corresponding 512-dim face embedding. It processes the image to extract features and then combines them with the embedding to make a final real/fake prediction. This forces the generator to produce images that are not only realistic but also consistent with the conditioning embedding.
 
-The functional model is publicaly available here - https://huggingface.co/amannagrawall002/generator_epoch_2.pth/tree/main and model architecture is in the script models.py to instantiate the respective model class.
+The functional model is publicaly available here -:
+https://huggingface.co/amannagrawall002/generator_epoch_2.pth/tree/main and model architecture is in the script models.py to instantiate the respective model class.
 
 There are 2 notebooks:
 
@@ -74,11 +75,8 @@ The final losses after 2 full epochs on the training set were:
 
 ### 1\. Requirements
 
-Install the necessary libraries from PyPI. It is recommended to do this in a virtual environment.
+The requirements are stated in the requirements.txt file and the env could be created by running the command pip install -r requirements.txt (after the python env is being created)
 
-```bash
-pip install torch torchvision torchaudio torcheval lpips facenet-pytorch datasets wandb
-```
 
 ### 2\. Training
 
