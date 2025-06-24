@@ -1,108 +1,124 @@
 # Conditional Face Generation with Pre-trained FaceNet Embeddings
 
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-%23EE4C2C.svg?style=flat&logo=PyTorch&logoColor=white)](https://pytorch.org/)
+[![Hugging Face Datasets](https://img.shields.io/badge/%F0%9F%A4%97%20Hugging%20Face-Datasets-yellow)](https://huggingface.co/datasets)
+[![wandb](https://img.shields.io/badge/wandb-visualize-yellowgreen)](https://wandb.ai)
 
-This project demonstrates the rapid development of a high-quality conditional Generative Adversarial Network (cGAN) for generating human faces. The model is conditioned on facial embeddings extracted by a pre-trained FaceNet model, allowing it to generate faces that retain key identity features.
+This project demonstrates the rapid development of a high-quality conditional Generative Adversarial Network (cGAN) capable of generating human faces based on identity features. The model is conditioned on 512-dimensional facial embeddings extracted by a pre-trained FaceNet model, allowing it to generate new faces while preserving the core identity of a source image.
 
-The primary goal was to simulate a one-day development cycle to build a production-viable model, emphasizing efficient design choices, robust tooling, and clear, metric-driven evaluation.
+The primary goal was to simulate a one-day development cycle to build a production-viable model, emphasizing efficient design, robust tooling, and clear, metric-driven evaluation.
 
+## Qualitative Results & Evaluation
 
-## Design Philosophy & Ingenuity
+The model demonstrates a strong ability to capture and reconstruct identity-specific facial features from an unseen test image. Below are examples where the model was given a real, unseen image, generated an embedding, and then produced a new face from that embedding and random noise.
 
-1.  **Leveraging Pre-trained Encoders (Model Choice):** Instead of training a standard GAN from scratch, we opted for a Conditional GAN. The key ingenuity is using a pre-trained **FaceNet (InceptionResnetV1)** model as a fixed feature extractor. This approach injects powerful, pre-existing knowledge of facial identity into the generator, dramatically accelerating training and improving the quality and coherence of the generated faces. The generator learns not just to create faces, but to create faces that match a given high-level identity vector. This was the embedding (kind of unique fingerprint which was feeded to generator and discriminator) and is analogous to BERT embedding in NLP. Have used a strong pre-tarined model (in eval mode) to feed the embeddings of face, no training of encoder is done in the pipeline (during training, inference and getting score result, all the time encoder was used in eval mode only.)
+<table>
+  <tr align="center">
+    <td><b>Real Image (Unseen Test Set)</b></td>
+    <td><b>AI-Generated Face from Embedding</b></td>
+  </tr>
+  <tr align="center">
+    <td>
+      <img src="./assets/realTestImageUnseen.png" alt="Real Unseen Test Image" width="300">
+    </td>
+    <td>
+      <img src="./assets/generatedImageFromTestSetEmbedding.png" alt="Generated Image" width="300">
+    </td>
+  </tr>
+</table>
 
-2.  **Efficient Data Handling (Dataset Choice):** We use the Hugging Face `datasets` library to stream the CelebA dataset (`flwrlabs/celeba`) directly from the hub (`streaming=True`). This production-ready approach is highly efficient as it avoids the need to download and store the entire \~22GB dataset locally, saving time and disk space. The celebA dataset is popular dataset in tasks involving human faces and is a huge dataset with train and test split, I found this dataset most suitable for training and test.
+## Live Training Dashboard (Weights & Biases)
 
-3.  **Robust Tooling & Compute:** The model was trained on an Apple Silicon Mac using the `mps` (Metal Performance Shaders) backend, demonstrating the feasibility of leveraging modern consumer hardware for deep learning tasks. All training and evaluation metrics were logged using `wandb` for reproducibility and clear reporting.
+The complete training process, including all metrics, losses, and generated image samples at every checkpoint, was logged using Weights & Biases. Due to organization-level privacy settings on the W&B workspace, direct public access is restricted. I've made the runs under org
 
-
-This was my first time, in which I was tracking the progress through weights and Biases platform.
-
-Pictures from wandb after 2 epoch training was completed are below, the provision to make the wandb public is not there in the weights and biases workspace in which I completed this project, so I'd need to invite people in my team for them to see the results of run involved in this project. For that I would need to get the mail ids to give access and invite in the workspace and then it would be visible to them. I am open to give access to mail id, but the project workspace cannot be made public (It's written down in the W&B settings under my workspace.) Comment mail id and I'll send a invite, then it can be visible.
+Pictures from wandb after 2 epoch training was completed are in wandb screenshots directory, the provision to make the wandb public is not there in the weights and biases workspace in which I completed this project, so I'd need to invite people in my team for them to see the results of run involved in this project. For that I would need to get the mail ids to give access and invite in the workspace and then it would be visible to them. I am open to give access to mail id, but the project workspace cannot be made public (It's written down in the W&B settings under my workspace.) Comment mail id and I'll send a invite, then it can be visible.
 
 Wandb (Org.) - amannagrawall002-iit-roorkee-org
 
 Wandb (username) - amannagrawall002
 
-The screenshots on the wandb can be seen in the directory wandb screenshots, the model was built from scratch and 2 epochs were run.
+A video walkthrough of the interactive dashboard, showcasing the model's learning progression over two epochs, is provided below.
 
-## Model Architecture
+<a href="https://www.loom.com/share/786e7cd321924bc3b46da82175989113?sid=7c7c0c10-df79-489c-b9ab-e55b6709dc4a">
+  <img style="max-width:300px;" src="https://cdn.loom.com/sessions/thumbnails/786e7cd321924bc3b46da82175989113-with-play.gif">
+</a>
 
-The architecture consists of three main components:
+> For direct access to the interactive W&B run, please provide an email address for an invitation to the private workspace. Screenshots from the dashboard are also available in the `/wandb screenshots` directory.
 
-1.  **FaceNet Encoder:** A pre-trained `InceptionResnetV1` model (trained on VGGFace2) that takes a 128x128 image and produces a 512-dimensional embedding vector. This encoder is frozen during training.
+## Design Philosophy & Model Choice
 
-2.  **Generator:** A DCGAN-style architecture that takes a 100-dim noise vector concatenated with the 512-dim face embedding from the encoder. It uses a series of `ConvTranspose2d` layers to upsample this combined vector into a 128x128x3 image.
+The project's success in a short timeframe is built on three core principles:
 
-3.  **Discriminator:** A conditional discriminator that receives both an image (real or fake) and the corresponding 512-dim face embedding. It processes the image to extract features and then combines them with the embedding to make a final real/fake prediction. This forces the generator to produce images that are not only realistic but also consistent with the conditioning embedding.
+1.  **Leveraging Pre-trained Encoders:** Instead of training a GAN from pure noise, this project uses a Conditional GAN (cGAN). The key ingenuity is employing a pre-trained **FaceNet (InceptionResnetV1)** model as a fixed feature extractor. This powerful, pre-existing knowledge of facial identity is injected into the generator, dramatically accelerating training. The generator learns not just to create faces, but to create faces that match a given high-level identity vector—analogous to how language models use text embeddings. The encoder was used exclusively in evaluation mode, ensuring no further training was performed on it.
 
-The functional model is publicaly available here -:
-https://huggingface.co/amannagrawall002/generator_epoch_2.pth/tree/main and model architecture is in the script models.py to instantiate the respective model class.
+2.  **Efficient Data Handling:** The Hugging Face `datasets` library was used to stream the CelebA dataset (`flwrlabs/celeba`) directly from the hub (`streaming=True`). This production-ready approach is highly efficient, avoiding the need to download the entire ~22GB dataset locally and enabling rapid experimentation.
 
-There are 2 notebooks:
+3.  **Modern Tooling & Compute:** The model was trained on an Apple Silicon Mac using the `mps` (Metal Performance Shaders) backend, demonstrating the feasibility of leveraging modern consumer hardware for deep learning. All metrics were logged using `wandb` for reproducibility and clear, interactive reporting.
 
-1. inference.ipynb -> It includes the inference on train as well as unseen test images.
-2. results.ipynb -> It includes the results on the test dataset of celebA (code with result and all details)
+## Model Architecture & Weights
 
-## Results & Evaluation
+The architecture consists of three main components, defined in `models.py`:
 
-The model was evaluated on the CelebA test set to measure its ability to generate perceptually convincing faces.
+1.  **FaceNet Encoder (Fixed):** A pre-trained `InceptionResnetV1` model that maps a 128x128 image to a 512-dimensional embedding vector.
+2.  **Generator:** A DCGAN-style architecture that takes a 100-dim noise vector concatenated with the 512-dim face embedding. It uses a series of `ConvTranspose2d` layers to upsample this combined vector into a 128x128x3 image.
+3.  **Discriminator:** A conditional discriminator that receives both an image (real or fake) and the corresponding 512-dim embedding. This forces the generator to produce images that are both realistic and consistent with the conditioning identity.
 
-### Quantitative Metrics
+The final trained Generator weights (`generator_epoch_2.pth`) are publicly available on the Hugging Face Hub:
+* **Model Hub Link:** [**amannagrawall002/generator_epoch_2.pth**](https://huggingface.co/amannagrawall002/generator_epoch_2.pth/tree/main)
 
-We used the **Learned Perceptual Image Patch Similarity (LPIPS)** score, which measures the perceptual distance between the real and generated images. It is a more human-aligned metric than traditional measures like MSE. The score was calculated by comparing a real test image to a new image generated using its embedding.
+## Quantitative Metrics
+
+The model was evaluated on the CelebA test set using the **Learned Perceptual Image Patch Similarity (LPIPS)** score, a metric that aligns closely with human perception of image similarity.
 
 | Metric | Score | Notes |
 | :--- | :--- | :--- |
 | **LPIPS** | **0.3981** | (Lower is better) Calculated over 200 batches from the test set. |
 
-This LPIPS score indicates a strong perceptual similarity between the input identity and the generated face, confirming the model's effectiveness.
-
-### Final Training Losses
-
-The final losses after 2 full epochs on the training set were:
-
-  * **Generator Loss**: 3.72521
-  * **Discriminator Loss**: 0.79712
-
-## Training Details
-
-  * **Compute:** Apple Silicon (M-series) GPU (`mps` device).
-  * **Dataset:** CelebA `train` split (\~162k images), streamed from Hugging Face.
-  * **Epochs:** 2
-  * **Batch Size:** 64
-  * **Batches per Epoch:** 2,525
-  * **Total Training Time:** Approx. 4-5 hours.
-  * **Preprocessing:** Images were resized and center-cropped to 128x128, then normalized to the range `[-1, 1]`.
-  * **Checkpoints:** Model weights were saved after each epoch. The final evaluation uses `generator_epoch_2.pth`.
+This strong LPIPS score indicates a high perceptual similarity between the input identity and the generated face, confirming the model's effectiveness. The final training losses after two epochs were **Generator Loss: 3.7252** and **Discriminator Loss: 0.7971**.
 
 ## Setup and Usage
 
-### 1\. Requirements
+### 1. Environment Setup
 
-The requirements are stated in the requirements.txt file and the env could be created by running the command pip install -r requirements.txt (after the python env is being created)
+It is recommended to create a virtual environment. Once created, install the required packages.
 
+```bash
+# Create and activate a virtual environment (e.g., venv)
+python3 -m venv venv
+source venv/bin/activate
+
+# Install requirements
+pip install -r requirements.txt
+````
 
 ### 2\. Training
 
-To start training the model from scratch or continue from a checkpoint, run the training script. Configure your `wandb` project and other parameters inside the script.
-The model was run for 2 epochs , first we trained it for 1 epoch (train.py).
-Then loading the model weights and ran it for epoch 2 (train2.py).
+The model was trained for two epochs sequentially. To replicate the training, first run `trainEpoch1.py` for the first epoch, then run `trainEpoch2.py` which will load the epoch 1 checkpoint and continue training for the second epoch.
 
 ```bash
-python train.py
+# Run epoch 1
+python trainEpoch1.py
+
+# Run epoch 2 (loads checkpoint from epoch 1)
+python trainEpoch2.py
 ```
 
-### 3\. Evaluation
+### 3\. Inference & Evaluation
 
-To evaluate a trained generator checkpoint and calculate the FID/LPIPS scores, use the provided Jupyter Notebook.
+The project includes two notebooks for analysis:
 
-```bash
-jupyter notebook evaluation.ipynb
-```
+  * **`inference.ipynb`**: Provides code to run inference on training images and new, unseen test images.
+  * **`results.ipynb`**: Contains the full code and detailed results for the quantitative evaluation on the CelebA test set.
 
-Make sure your checkpoint file (e.g., `generator_epoch_2.pth`) is located in the `./checkpoints` directory.
+## Training Details & Hyperparameters
 
-## Hyperparameters
+  * **Compute:** Apple Silicon M-series GPU (`mps` device)
+  * **Dataset:** CelebA `train` split (\~162k images), streamed
+  * **Epochs:** 2
+  * **Batch Size:** 64
+  * **Total Training Time:** Approx. 4-5 hours
+  * **Preprocessing:** Images resized and center-cropped to 128x128, normalized to `[-1, 1]`.
 
 The following configuration was used for the final training run:
 
@@ -122,8 +138,4 @@ config = {
     "sample_interval": 100,
     "checkpoint_dir": "./checkpoints",
 }
-
-# Label smoothing for discriminator stability
-real_label = 0.9
-fake_label = 0.0
 ```
