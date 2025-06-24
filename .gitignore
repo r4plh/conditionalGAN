@@ -1,0 +1,84 @@
+# Byte-compiled / optimized / C extensions
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+#  Usually these files are written by a PyInstaller script; this is just a
+#  reminder to not commit PyInstaller artifacts.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IDE / Editor folders
+.idea/
+.vscode/
+
+# OS-generated files
+.DS_Store
+
+# --- Project Specific ---
+
+# Weights & Biases local logs
+/wandb/
+
+# Model checkpoints
+/checkpoints/
+
+# Video output
+/invideo/
+
+# Python Environment
+/venv/
+/env/
+/.venv/
+/.env/
+
+# Data files (if you ever download them locally)
+# *.csv
+# *.json
+# *.xml
