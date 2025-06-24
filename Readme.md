@@ -40,7 +40,7 @@ Wandb (username) - amannagrawall002
 
 A video walkthrough of the interactive dashboard, showcasing the model's learning progression over two epochs, is provided below.
 
-[![W&B Dashboard Walkthrough](https://cdn.loom.com/sessions/thumbnails/786e7cd321924bc3b46da82175989113-with-play.gif)](https://www.loom.com/share/786e7cd321924bc3b46da82175989113?sid=7c7c0c10-df79-489c-b9ab-e55b6709dc4a)
+[**Video Walkthrough of the W&B Dashboard**](https://www.loom.com/share/786e7cd321924bc3b46da82175989113?sid=7c7c0c10-df79-489c-b9ab-e55b6709dc4a)
 
 > For direct access to the interactive W&B run, please provide an email address for an invitation to the private workspace. Screenshots from the dashboard are also available in the `/wandb screenshots` directory.
 
